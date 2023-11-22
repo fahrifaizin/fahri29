@@ -1,0 +1,50 @@
+<div class="container text-center">
+    <h1>Daftar Contact</h1>
+  
+    <br />
+    <div class="row">
+      <div class="col-md-8 mx-auto">
+        <table
+          class="table table-striped table-hover shadow p-3 mb-5 bg-body rounded"
+        >
+          <thead>
+            <tr>
+              <th scope="col">Nomor</th>
+              <th scope="col">Nama</th>
+              <th scope="col">Nomor Telpon</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (isEmpty == 'test') { %>
+            <div
+              class="alert alert-warning text-center shadow p-3 mb-5 bg-body rounded" role="alert">
+              <h4>Data kontak tidak ada</h4>
+            </div>
+            <% } else { 
+             contacts.forEach((contact, index) => { index++ %>
+            <tr>
+              <th scope="row"><%= index++ %></th>
+              <td><%= contact.nama %></td>
+              <td><%= contact.nomortelpon %></td>
+              <td>
+                <a href="/contact/<%= contact.nama %>"class="btn btn-success badge rounded-pill">
+                  <i class="bi bil-info-circle"></i>detail</a>
+                <a href="/contact/delete/<%= contact.nama %>"class="btn btn-danger badge rounded-pill">
+                  <i class="bi bil-info-circle"></i>Delete</a>
+                <a href="/contact/update/<%= contact.nama %>"class="btn btn-warning badge rounded-pill">
+                  <i class="bi bil-info-circle"></i>Ubah</a>
+              </td>
+            </tr>
+            <% })} %>
+          </tbody>
+        </table>
+        <a
+          href="/contact/add"
+          class="btn btn-success btn-gradient mb-2 shadow p-2"
+          >Tambahkan data kontak</a
+        >
+      </div>
+    </div>
+  </div>
+  
