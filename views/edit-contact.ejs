@@ -16,10 +16,10 @@
             <% } %>
 
             <form method="post" action="/contact/update">
-                <input type="hidden" name="oldNama" value="<%=contact.oldNama || contact.nama%>">
                 <div class="mb-3">
                     <label for="nama" class="form-label">Nama</label>
-                    <input type="text" class="form-control" id="nama" name="nama" required value="<%= contact.nama%>"/>
+                    <input type="hidden" class="form-control" id="id" name="id" value="<%= contact.id%>" readonly/>
+                    <input type="text" class="form-control" id="nama" name="nama" value="<%= contact.nama%>"/>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
@@ -27,7 +27,7 @@
                 </div>
                 <div class="mb-3">
                     <label for="noTelp" class="form-label">Nomor Telpon</label>
-                    <input type="text" class="form-control" id="nomorTelp" name="NomorTelpon" value="<%= contact.NomorTelpon %>"/>
+                    <input type="text" class="form-control" id="nomorTelp" name="nomortelpon" value="<%= contact.nomortelpon %>"/>
                 </div>
                 <button type="submit" class="btn btn-primary">Simpan</button>
             </form>

@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const expressLayouts = require("express-ejs-layouts");
 // const { addContact, fetchContact, searchContact, duplicateCheck, deleteContact, updateContacts } = require("./utility/contactsJSON.js");
-const { fetchContact, searchContactByName } = require("./utility/contactsDB.js");
+const { fetchContact, searchContactByID, duplicateCheck, addContact, deleteContact, updateContact } = require("./utility/contactsDB.js");
 const { body, validationResult, check } = require("express-validator");
 const host = "localhost";
 const port = 3001;
@@ -71,9 +71,8 @@ app.get("/contact/add", (req, res) => {
   });
 });
 
-app.get('/contact/update/:nama', (req, res) => {
-  const contact = searchContact(req.params.nama);
-
+app.get('/contact/update/:id', async (req, res) => {
+  const contact = await searchContactByID(req.params.id);
   res.render('edit-contact', {
       title: 'Form Edit Data Contact',
       layout: 'layout/core-layout',
@@ -82,32 +81,40 @@ app.get('/contact/update/:nama', (req, res) => {
 })
 
 app.post(
-  "/contact",
-  [
-    body("nama").custom((value) => {
-      const duplicateNama = duplicateCheck(value, 1);
-      if (duplicateNama) {
-        throw new Error("Nama Sudah Di Gunakan");
-      }
-      return true;
-    }),
-    body("email").custom((value) => {
-      const duplicateEmail = duplicateCheck(value, 2);
-      if (duplicateEmail) {
-        throw new Error("Email Sudah Di Gunakan");
-      }
-      return true;
-    }),
+  "/contact",[
+    check('nama', 'Nama Harus Diisi').notEmpty(),
     check('email', 'Email Tidak Valid').notEmpty().isEmail(),
-    check("NomorTelpon", "Nomor Telp Tidak Valid").notEmpty().isMobilePhone("id-ID")
-  ],
-  (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    check("nomortelpon", "Nomor Telp Tidak Valid").notEmpty().isMobilePhone("id-ID")
+  ], async (req, res) => {
+    const duplikatNama = await duplicateCheck(req.body.nama, 1);
+    const duplikatEmail = await duplicateCheck(req.body.email, 2);
+    const errors = []
+    errors.push(validationResult(req).errors)
+    if(duplikatNama.length > 0){
+      errors[0].push({
+        'type' : 'field',
+        'value' : req.body.nama,
+        'msg':'Nama sudah ada',
+        'path' : 'nama',
+        'location' : 'body',
+      })
+    }
+    
+    if(duplikatEmail.length > 0){
+      errors[0].push({
+        'type' : 'field',
+        'value' : req.body.email,
+        'msg':'Email sudah ada',
+        'path' : 'email',
+        'location' : 'body',
+      })
+    }
+
+    if (errors[0].length > 0) {
       res.render("add-contact", {
         title: "Welcome To The - Add Contact",
         layout: "layout/core-layout.ejs",
-        errors: errors.array(),
+        errors: errors[0],
       });
     } else {
       addContact(req.body);
@@ -116,54 +123,60 @@ app.post(
   }
 );
 
-app.get("/contact/delete/:nama", (req, res) => {
-  const contact = searchContact(req.params.nama);
-  if (!contact) {
-      res.status(404);
-      res.send("Data Tidak Ada")
-  } else {
-      deleteContact(req.params.nama);
-      req.flash("msg", "Data Contact Sudah Dihapus")
-      res.redirect("/contact");
-  }
-      
+app.get("/contact/delete/:id", async (req, res) => {
+  await deleteContact(req.params.id);
+  req.flash("msg", "Data Contact Sudah Dihapus")
+  res.redirect("/contact");   
 })
 
 app.post("/contact/update", [
-  body("nama").custom((value, {req}) => { 
-      var duplikatNama = duplicateCheck(value, 1);
-      if (value !== req.body.oldNama && duplikatNama) {
-          throw new Error("Nama Sudah Di Gunakan");
-      }
-      return true;
-  }),
-  body("email").custom((value) => {
-    const duplicateEmail = duplicateCheck(value, 2);
-    if (duplicateEmail) {
-      throw new Error("Email Sudah Di Gunakan");
-    }
-    return true;
-  }),
+  check('nama', 'Nama Harus Diisi').notEmpty(),
   check('email', 'Email Tidak Valid').notEmpty().isEmail(),
-  check("NomorTelpon", "Nomor Telp Tidak Valid").notEmpty().isMobilePhone("id-ID")
-], (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {        
+  check("nomortelpon", "Nomor Telp Tidak Valid").notEmpty().isMobilePhone("id-ID")
+], async (req, res) => {
+  const duplikatNama = await duplicateCheck(req.body.nama, 1);
+  const duplikatEmail = await duplicateCheck(req.body.email, 2);
+  const errors = []
+  errors.push(validationResult(req).errors)
+  if(duplikatNama.length > 0){
+    if(req.body.id != duplikatNama[0].id){
+      errors[0].push({
+        'type' : 'field',
+        'value' : req.body.nama,
+        'msg':'Nama sudah ada',
+        'path' : 'nama',
+        'location' : 'body',
+      })
+    }
+  }
+  
+  if(duplikatEmail.length > 0){
+    if(req.body.id != duplikatEmail[0].id){
+      errors[0].push({
+        'type' : 'field',
+        'value' : req.body.email,
+        'msg':'Email sudah ada',
+        'path' : 'email',
+        'location' : 'body',
+      })
+    }
+  }
+  if (errors[0].length > 0) {        
       res.render("edit-contact", {
           title: "Form Edit Data Contact",
           layout: "layout/core-layout",
-          errors: errors.array(),
+          errors: errors[0],
           contact: req.body,
       });
   } else {
-      updateContacts(req.body)
+      updateContact(req.body)
       req.flash("msg", "Data Contact Berhasil Diubah")
       res.redirect("/contact")
   }
 })
 
-app.get("/contact/:nama", async (req, res) => {
-  const contact = await searchContactByName(decodeURI(req.params.nama));
+app.get("/contact/:id", async (req, res) => {
+  const contact = await searchContactByID(decodeURI(req.params.id));
   res.render("detail", {
     title: "Welcome To The World - Detail Contact",
     contact,

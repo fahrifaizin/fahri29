@@ -16,7 +16,7 @@
             </tr>
           </thead>
           <tbody>
-            <% if (isEmpty == 'test') { %>
+            <% if (isEmpty) { %>
             <div
               class="alert alert-warning text-center shadow p-3 mb-5 bg-body rounded" role="alert">
               <h4>Data kontak tidak ada</h4>
@@ -28,11 +28,11 @@
               <td><%= contact.nama %></td>
               <td><%= contact.nomortelpon %></td>
               <td>
-                <a href="/contact/<%= contact.nama %>"class="btn btn-success badge rounded-pill">
+                <a href="/contact/<%= contact.id %>"class="btn btn-success badge rounded-pill">
                   <i class="bi bil-info-circle"></i>detail</a>
-                <a href="/contact/delete/<%= contact.nama %>"class="btn btn-danger badge rounded-pill">
+                <a href="/contact/delete/<%= contact.id %>"class="btn btn-danger badge rounded-pill">
                   <i class="bi bil-info-circle"></i>Delete</a>
-                <a href="/contact/update/<%= contact.nama %>"class="btn btn-warning badge rounded-pill">
+                <a href="/contact/update/<%= contact.id %>"class="btn btn-warning badge rounded-pill">
                   <i class="bi bil-info-circle"></i>Ubah</a>
               </td>
             </tr>
